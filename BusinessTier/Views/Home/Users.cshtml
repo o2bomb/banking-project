@@ -1,0 +1,79 @@
+﻿<h1>Users</h1>
+<h3>Create a new user:</h3>
+<form onsubmit="createUser(); return false;">
+    <div class="form-group">
+        <label for="createUserID">User ID</label>
+        <input type="text" id="createUserID" name="userID" placeholder="User ID" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="createFName">First Name</label>
+        <input type="text" id="createFName" name="fName" placeholder="First Name" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="createLName">Last Name</label>
+        <input type="text" id="createLName" name="lName" placeholder="Last Name" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Create User</button>
+</form>
+<h3>Search for a user:</h3>
+<form onsubmit="searchUser()">
+    <div class="form-group">
+        <label for="userID">User ID</label>
+        <input type="text" id="userID" name="userID" placeholder="User ID" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-sm-6">
+                <label for="fName">First Name</label>
+                <input type="text" id="fName" name="fName" placeholder="First Name" class="form-control" readonly />
+            </div>
+            <div class="col-sm-6">
+                <label for="lName">Last Name</label>
+                <input type="text" id="lName" name="lName" placeholder="Last Name" class="form-control" readonly />
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Get Details</button>
+</form>
+<div id="successAlert" class="alert alert-success alert-dismissable hide">
+    Successfully created new user!
+</div>
+
+<script>
+    function createUser() {
+        $.ajax({
+            url: '/api/bank/user/create',
+            type: 'post',
+            contentType: 'application/json',
+            data: {
+                userID: parseInt($('#createUserID').val()),
+                firstName: $('#createFName').val(),
+                lastName: $('#createLName').val()
+            },
+            success: function (data, textStatus, jqXHR) {
+                var obj = data;
+                $('#successAlert').removeClass('hide');
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown)
+            }
+        });
+    }
+
+    function searchUser() {
+        $.ajax({
+            url: '/api/bank/user/' + $('#userID').val(),
+            type: 'get',
+            contentType: 'application/json',
+            processData: false,
+            success: function (data, textStatus, jqXHR) {
+                var obj = data;
+                $('#fName').val(obj.firstName);
+                $('#lName').val(obj.lastName);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(errorThrown)
+            }
+        });
+    }
+</script>

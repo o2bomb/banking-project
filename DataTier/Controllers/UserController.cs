@@ -6,12 +6,13 @@ using System.Net.Http;
 using System.Web.Http;
 using APIClasses;
 using BankDB;
+using DataTier.Models;
 
 namespace DataTier.Controllers
 {
     public class UserController : ApiController
     {
-        private static BankDB.BankDB db = new BankDB.BankDB();
+        private static BankDB.BankDB db = BankDBProvider.getInstance();
         private static UserAccessInterface access = db.GetUserAccess();
 
         [Route("api/user/{userID}")]
@@ -22,7 +23,19 @@ namespace DataTier.Controllers
 
             access.SelectUser(userID);
             result.userID = userID;
-            access.GetUserName(out result.firstName, out result.lastName);
+            try
+            {
+                access.GetUserName(out result.firstName, out result.lastName);
+            }
+            catch (Exception)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent("User details could not be retreived"),
+                    ReasonPhrase = "User could not be found"
+                };
+                throw new HttpResponseException(response);
+            }
             return result;
         }
 
@@ -30,6 +43,16 @@ namespace DataTier.Controllers
         [HttpPost]
         public uint CreateUser([FromBody]UserDetailStruct newUser)
         {
+            if (newUser.firstName.Length < 1 || newUser.lastName.Length < 1)
+            {
+                // User's name cannot be empty
+                var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent("User could not be created"),
+                    ReasonPhrase = "User cannot have an empty first or last name"
+                };
+                throw new HttpResponseException(response);
+            }
             UserDetailStruct result = new UserDetailStruct();
 
             result.userID = access.CreateUser();
@@ -46,7 +69,7 @@ namespace DataTier.Controllers
             List<uint> userIDs = access.GetUsers();
             List<UserDetailStruct> result = new List<UserDetailStruct>();
 
-            foreach(uint ID in userIDs)
+            foreach (uint ID in userIDs)
             {
                 UserDetailStruct entry = new UserDetailStruct();
 
@@ -62,8 +85,30 @@ namespace DataTier.Controllers
         [HttpPost]
         public void SetUserDetails(uint userID, [FromBody]UserDetailStruct user)
         {
+            if (user.firstName.Length < 1 || user.lastName.Length < 1)
+            {
+                // User's updated name cannot be empty
+                var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent("User details could not be updated"),
+                    ReasonPhrase = "User cannot have an empty first or last name"
+                };
+                throw new HttpResponseException(response);
+            }
             access.SelectUser(userID);
-            access.SetUserName(user.firstName, user.lastName);
+            try
+            {
+                access.SetUserName(user.firstName, user.lastName);
+            }
+            catch (Exception)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent("User details could not be updated"),
+                    ReasonPhrase = "User could not be found"
+                };
+                throw new HttpResponseException(response);
+            }
         }
     }
 }

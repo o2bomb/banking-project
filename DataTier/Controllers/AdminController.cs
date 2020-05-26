@@ -4,13 +4,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using BankDB;
+using DataTier.Models;
 
 namespace DataTier.Controllers
 {
     public class AdminController : ApiController
     {
-        private static BankDB.BankDB db = new BankDB.BankDB();
+        private static BankDB.BankDB db = BankDBProvider.getInstance();
         
         [Route("api/Admin/processTransactions")]
         [HttpGet]

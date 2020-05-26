@@ -6,12 +6,13 @@ using System.Net.Http;
 using System.Web.Http;
 using APIClasses;
 using BankDB;
+using DataTier.Models;
 
 namespace DataTier.Controllers
 {
     public class TransactionController : ApiController
     {
-        private static BankDB.BankDB db = new BankDB.BankDB();
+        private static BankDB.BankDB db = BankDBProvider.getInstance();
         private static TransactionAccessInterface access = db.GetTransactionInterface();
 
         [Route("api/Transaction/{transactionID}")]
@@ -53,6 +54,15 @@ namespace DataTier.Controllers
         [HttpPost]
         public TransactionDetailStruct CreateTransaction([FromBody]TransactionDetailStruct newTransaction)
         {
+            if (newTransaction.amount < 0)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent("Could not create new transaction"),
+                    ReasonPhrase = "Transaction amount cannot be less than 0"
+                };
+                throw new HttpResponseException(response);
+            }
             TransactionDetailStruct result = new TransactionDetailStruct();
 
             result.transactionID = access.CreateTransaction();

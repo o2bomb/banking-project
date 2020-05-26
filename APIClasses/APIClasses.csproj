@@ -45,6 +45,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactionDetailStruct.cs" />
     <Compile Include="UserDetailStruct.cs" />
+    <Compile Include="UserNotFoundException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

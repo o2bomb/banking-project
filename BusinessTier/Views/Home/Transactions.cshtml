@@ -1,40 +1,49 @@
 ﻿<h1>Transactions</h1>
 <h3>Create a new transaction:</h3>
-<form onsubmit="handleSubmit()">
+<form onsubmit="createTransaction(); return false;">
     <div class="form-group">
-        <label for="senderID">Sender ID</label>
-        <input type="text" id="senderID" name="senderID" placeholder="Sender ID" class="form-control" required />
+        <label for="createSenderID">Sender ID</label>
+        <input type="text" id="createSenderID" name="createSenderID" placeholder="Sender ID" class="form-control" required />
     </div>
     <div class="form-group">
-        <label for="receiverID">Receiver ID</label>
-        <input type="text" id="receiverID" name="receiverID" placeholder="Receiver ID" class="form-control" required />
+        <label for="createReceiverID">Receiver ID</label>
+        <input type="text" id="createReceiverID" name="createReceiverID" placeholder="Receiver ID" class="form-control" required />
     </div>
     <div class="form-group">
-        <label for="amount">Amount</label>
-        <input type="text" id="amount" name="amount" placeholder="Amount" class="form-control" required />
+        <label for="createAmount">Amount</label>
+        <input type="text" id="createAmount" name="createAmount" placeholder="Amount" class="form-control" required />
     </div>
-    <button type="submit" id="submitBtn" class="btn btn-primary">Get Details</button>
+    <button type="submit" class="btn btn-primary">Create Transaction</button>
 </form>
 
 <script>
-    function handleSubmit() {
-        $.ajax({
-            url: '/api/bank/transaction/create',
-            type: 'post',
-            contentType: 'application/json',
-            data: {
-                senderID: parseInt($('#senderID').val()),
-                receiverID: parseInt($('#receiverID').val()),
-                amount: $('#amount').val()
-            },
-            success: function (data, textStatus, jqXHR) {
-                //var obj = data;
-                //$('#userID').val(obj.userID);
-                //$('#balance').val(obj.balance);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.log(errorThrown)
-            }
-        });
+    function createTransaction() {
+        const data = {
+            senderID: parseInt($('#createSenderID').val(), 10),
+            receiverID: parseInt($('#createReceiverID').val(), 10),
+            amount: parseInt($('#createAmount').val(), 10)
+        };
+        // Only send the request if the specified IDs are numbers, and the amount is more than 0
+        if (!isNaN(data.senderID) && data.senderID >= 0 && !isNan(data.receiverID) && data.receiverID >= 0 && !isNaN(data.amount) && data.amount > 0) {
+            $.ajax({
+                url: '/api/bank/transaction/create',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (data, textStatus, jqXHR) {
+                    var message = "Transaction created successfully:\n";
+                    message += "Transaction ID: " + data.transactionID + "\n"
+                    message += "Sender ID: " + data.senderID + "\n";
+                    message += "Receiver ID: " + data.receiverID + "\n";
+                    message += "Amount transferred: " + data.amount;
+                    window.alert(message);
+                },
+                error: function (response) {
+                    window.alert("Failed to create transaction: " + response.responseText);
+                }
+            });
+        } else {
+            window.alert("Failed to create transaction: Specified IDs and amount must be a positive number");
+        }
     }
 </script>

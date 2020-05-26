@@ -23,6 +23,16 @@ namespace BusinessTier.Controllers
         {
             RestRequest req = new RestRequest(String.Format("api/user/{0}", userID));
             IRestResponse res = client.Execute(req);
+            if (res.StatusCode == HttpStatusCode.NotFound)
+            {
+                // If the server returns a NOT FOUND status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(res.Content + ", " + res.StatusDescription),
+                    ReasonPhrase = res.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
             UserDetailStruct result = JsonConvert.DeserializeObject<UserDetailStruct>(res.Content);
 
             return result;
@@ -32,6 +42,7 @@ namespace BusinessTier.Controllers
         [HttpGet]
         public List<TransactionDetailStruct> GetUserTransactions(uint userID)
         {
+
             RestRequest req1 = new RestRequest("api/transaction/all");
             IRestResponse res1 = client.Execute(req1);
             List<TransactionDetailStruct> temp = JsonConvert.DeserializeObject<List<TransactionDetailStruct>>(res1.Content);
@@ -47,6 +58,15 @@ namespace BusinessTier.Controllers
         {
             RestRequest req = new RestRequest(String.Format("api/account/all/{0}", userID));
             IRestResponse res = client.Execute(req);
+            if (res.StatusCode == HttpStatusCode.NotFound)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(res.Content + ", " + res.StatusDescription),
+                    ReasonPhrase = res.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
             List<AccountDetailStruct> result = JsonConvert.DeserializeObject<List<AccountDetailStruct>>(res.Content);
 
             return result;
@@ -59,6 +79,16 @@ namespace BusinessTier.Controllers
             // Get the account
             RestRequest req1 = new RestRequest(String.Format("api/account/{0}", accountID));
             IRestResponse res1 = client.Execute(req1);
+            if (res1.StatusCode == HttpStatusCode.NotFound)
+            {
+                // If the server returns a NOT FOUND status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(res1.Content + ", " + res1.StatusDescription),
+                    ReasonPhrase = res1.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
             AccountDetailStruct result = JsonConvert.DeserializeObject<AccountDetailStruct>(res1.Content);
 
             return result;
@@ -73,7 +103,16 @@ namespace BusinessTier.Controllers
             uint body = amount;
             req1.AddJsonBody(body);
             IRestResponse res1 = client.Execute(req1);
-
+            if (res1.StatusCode == HttpStatusCode.NotFound || res1.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // If the server returns a NOT FOUND or BAD REQUEST status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(res1.StatusCode)
+                {
+                    Content = new StringContent(res1.Content + ", " + res1.StatusDescription),
+                    ReasonPhrase = res1.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
             // Process pending transactions
             IRestResponse processRes = client.Execute(processTransactionsRequest);
             // Save to disk
@@ -96,6 +135,16 @@ namespace BusinessTier.Controllers
             uint body = amount;
             req.AddJsonBody(body);
             IRestResponse res = client.Execute(req);
+            if (res.StatusCode == HttpStatusCode.NotFound || res.StatusCode == HttpStatusCode.BadRequest || res.StatusCode == HttpStatusCode.Forbidden)
+            {
+                // If the server returns a NOT FOUND or BAD REQUEST or FORBIDDEN status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(res.StatusCode)
+                {
+                    Content = new StringContent(res.Content + ", " + res.StatusDescription),
+                    ReasonPhrase = res.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
 
             // Process pending transactions
             IRestResponse processRes = client.Execute(processTransactionsRequest);
@@ -112,16 +161,29 @@ namespace BusinessTier.Controllers
 
         [Route("api/Bank/account/create/{userID}")]
         [HttpGet]
-        public void CreateAccount(uint userID)
+        public AccountDetailStruct CreateAccount(uint userID)
         {
             // Create the account
             RestRequest req = new RestRequest(String.Format("api/account/create/{0}", userID));
             IRestResponse res = client.Execute(req);
+            if (res.StatusCode == HttpStatusCode.NotFound)
+            {
+                // If the server returns a NOT FOUND status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(res.Content + ", " + res.StatusDescription),
+                    ReasonPhrase = res.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
+            AccountDetailStruct result = JsonConvert.DeserializeObject<AccountDetailStruct>(res.Content);
 
             // Process pending transactions
             IRestResponse processRes = client.Execute(processTransactionsRequest);
             // Save to disk
             IRestResponse saveRes = client.Execute(saveToDiskRequest);
+
+            return result;
         }
 
         [Route("api/Bank/user/create")]
@@ -132,6 +194,16 @@ namespace BusinessTier.Controllers
             RestRequest req = new RestRequest("api/user/create", Method.POST);
             req.AddJsonBody(newUser);
             IRestResponse res = client.Execute(req);
+            if (res.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // If the server returns a BAD REQUEST status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(res.Content + ", " + res.StatusDescription),
+                    ReasonPhrase = res.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
             uint userID = JsonConvert.DeserializeObject<uint>(res.Content);
 
             // Process pending transactions
@@ -155,6 +227,16 @@ namespace BusinessTier.Controllers
             RestRequest req = new RestRequest(String.Format("api/user/{0}/setDetails", userID), Method.POST);
             req.AddJsonBody(user);
             IRestResponse res = client.Execute(req);
+            if (res.StatusCode == HttpStatusCode.BadRequest || res.StatusCode == HttpStatusCode.NotFound)
+            {
+                // If the server returns a BAD REQUEST status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(res.StatusCode)
+                {
+                    Content = new StringContent(res.Content + ", " + res.StatusDescription),
+                    ReasonPhrase = res.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
 
             // Process pending transactions
             IRestResponse processRes = client.Execute(processTransactionsRequest);
@@ -177,6 +259,16 @@ namespace BusinessTier.Controllers
             RestRequest req = new RestRequest("api/transaction/create", Method.POST);
             req.AddJsonBody(newTransaction);
             IRestResponse res = client.Execute(req);
+            if (res.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // If the server returns a BAD REQUEST status code, throw a HttpResponseException
+                var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(res.Content + ", " + res.StatusDescription),
+                    ReasonPhrase = res.StatusDescription
+                };
+                throw new HttpResponseException(response);
+            }
             TransactionDetailStruct result = JsonConvert.DeserializeObject<TransactionDetailStruct>(res.Content);
 
             // Process the transaction

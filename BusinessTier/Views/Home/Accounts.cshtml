@@ -1,40 +1,157 @@
 ﻿<h1>Accounts</h1>
-<h3>Get an account's details:</h3>
-<form onsubmit="handleSubmit()">
+<h3>Create a new account for a user:</h3>
+<form onsubmit="createAccount(); return false;">
     <div class="form-group">
-        <label for="accountID">User ID</label>
-        <input type="text" id="accountID" name="accountID" placeholder="Account ID" class="form-control" required />
+        <label for="createUserID">User ID</label>
+        <input type="text" id="createUserID" name="createUserID" placeholder="User ID" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Create Account</button>
+</form>
+<h3>Get an account's details:</h3>
+<form onsubmit="searchAccount(); return false;">
+    <div class="form-group">
+        <label for="searchAccountID">Account ID</label>
+        <input type="text" id="searchAccountID" name="searchAccountID" placeholder="Account ID" class="form-control" required />
     </div>
     <div class="form-group">
         <div class="row">
             <div class="col-sm-6">
-                <label for="userID">User ID</label>
-                <input type="text" id="userID" name="userID" placeholder="User ID" class="form-control" readonly />
+                <label for="searchUserID">User ID</label>
+                <input type="text" id="searchUserID" name="searchUserID" placeholder="User ID" class="form-control" readonly />
             </div>
             <div class="col-sm-6">
-                <label for="balance">Balance</label>
-                <input type="text" id="balance" name="balance" placeholder="Last Name" class="form-control" readonly />
+                <label for="searchBalance">Balance</label>
+                <input type="text" id="searchBalance" name="searchBalance" placeholder="Balance" class="form-control" readonly />
             </div>
         </div>
     </div>
-    <button type="submit" id="submitBtn" class="btn btn-primary">Get Details</button>
+    <button type="submit" class="btn btn-primary">Get Details</button>
+</form>
+<h3>Do account deposit:</h3>
+<form onsubmit="depositAccount(); return false;">
+    <div class="form-group">
+        <label for="depositAccountID">Account ID</label>
+        <input type="text" id="depositAccountID" name="depositAccountID" placeholder="Account ID" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="depositAmount">Amount</label>
+        <input type="text" id="depositAmount" name="depositAmount" placeholder="Amount" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Perform Deposit</button>
+</form>
+<h3>Do account withdrawal:</h3>
+<form onsubmit="withdrawAccount(); return false;">
+    <div class="form-group">
+        <label for="withdrawAccountID">Account ID</label>
+        <input type="text" id="withdrawAccountID" name="withdrawAccountID" placeholder="Account ID" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="withdrawAmount">Amount</label>
+        <input type="text" id="withdrawAmount" name="withdrawAmount" placeholder="Amount" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Perform Withdrawal</button>
 </form>
 
 <script>
-    function handleSubmit() {
-        $.ajax({
-            url: '/api/bank/account/' + $('#accountID').val(),
-            type: 'get',
-            contentType: 'application/json',
-            processData: false,
-            success: function (data, textStatus, jqXHR) {
-                var obj = data;
-                $('#userID').val(obj.userID);
-                $('#balance').val(obj.balance);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.log(errorThrown)
-            }
-        });
+    function createAccount() {
+        const id = parseInt($('#createUserID').val());
+        // Only send the request if the specified ID is a number
+        if (!isNaN(id) && id >= 0) {
+            $.ajax({
+                url: '/api/bank/account/create/' + id,
+                type: 'GET',
+                contentType: 'application/json',
+                processData: false,
+                success: function (data, textStatus, jqXHR) {
+                    var message = "Account created successfully:\n";
+                    message += "User ID: " + data.userID + "\n"
+                    message += "Account ID: " + data.accountID + "\n";
+                    message += "Starting balance: " + data.balance;
+                    window.alert(message);
+                },
+                error: function (response) {
+                    window.alert("Failed to create account: " + response.responseText);
+                }
+            });
+        } else {
+            window.alert("Failed to search for account: Specified ID must be a positive number");
+        }
+    }
+
+    function searchAccount() {
+        const id = parseInt($('#searchAccountID').val());
+        // Only send the request if the specified ID is a number
+        if (!isNaN(id) && id >= 0) {
+            $.ajax({
+                url: '/api/bank/account/' + id,
+                type: 'GET',
+                contentType: 'application/json',
+                processData: false,
+                success: function (data, textStatus, jqXHR) {
+                    var obj = data;
+                    $('#searchUserID').val(obj.userID);
+                    $('#searchBalance').val(obj.balance);
+                },
+                error: function (response) {
+                    window.alert("Failed to search for user: " + response.responseText);
+                }
+            });
+        } else {
+            window.alert("Failed to search for account: Specified ID must be a positive number");
+        }
+    }
+
+    function depositAccount() {
+        const id = parseInt($('#depositAccountID').val());
+        const amount = parseInt($('#depositAmount').val());
+        // Only send the request if the specified ID and amount is a number
+        if (!isNaN(id) && id >= 0 && !isNaN(amount) && amount >= 0) {
+            $.ajax({
+                url: '/api/bank/account/' + id + '/deposit',
+                type: 'POST',
+                contentType: 'application/json',
+                processData: false,
+                data: JSON.stringify(amount),
+                success: function (data, textStatus, jqXHR) {
+                    var message = "Deposited into account successfully:\n";
+                    message += "User ID: " + data.userID + "\n"
+                    message += "Account ID: " + data.accountID + "\n";
+                    message += "Current balance: " + data.balance;
+                    window.alert(message);
+                },
+                error: function (response) {
+                    window.alert("Failed to perform deposit: " + response.responseText);
+                }
+            });
+        } else {
+            window.alert("Failed to perform deposit: Specified ID and amount must be a positive number");
+        }
+    }
+
+    function withdrawAccount() {
+        const id = parseInt($('#withdrawAccountID').val());
+        const amount = parseInt($('#withdrawAmount').val());
+        // Only send the request if the specified ID and amount is a number
+        if (!isNaN(id) && id >= 0 && !isNaN(amount) && amount >= 0) {
+            $.ajax({
+                url: '/api/bank/account/' + id + '/withdraw',
+                type: 'POST',
+                contentType: 'application/json',
+                processData: false,
+                data: JSON.stringify(amount),
+                success: function (data, textStatus, jqXHR) {
+                    var message = "Deposited into account successfully:\n";
+                    message += "User ID: " + data.userID + "\n"
+                    message += "Account ID: " + data.accountID + "\n";
+                    message += "Current balance: " + data.balance;
+                    window.alert(message);
+                },
+                error: function (response) {
+                    window.alert("Failed to perform withdrawal: " + response.responseText);
+                }
+            });
+        } else {
+            window.alert("Failed to perform withdrawal: Specified ID and amount must be a positive number");
+        }
     }
 </script>

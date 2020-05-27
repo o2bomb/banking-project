@@ -38,16 +38,15 @@ namespace BusinessTier.Controllers
             return result;
         }
 
-        [Route("api/Bank/user/{userID}/transactions")]
+        [Route("api/Bank/account/{accountID}/transactions")]
         [HttpGet]
-        public List<TransactionDetailStruct> GetUserTransactions(uint userID)
+        public List<TransactionDetailStruct> GetUserTransactions(uint accountID)
         {
-
             RestRequest req1 = new RestRequest("api/transaction/all");
             IRestResponse res1 = client.Execute(req1);
             List<TransactionDetailStruct> temp = JsonConvert.DeserializeObject<List<TransactionDetailStruct>>(res1.Content);
-            // Filter out transactions that don't belong to the user
-            List<TransactionDetailStruct> result = temp.Where(value => value.senderID == userID || value.receiverID == userID).ToList();
+            // Filter out transactions that don't belong to the account
+            List<TransactionDetailStruct> result = temp.Where(value => value.senderID == accountID || value.receiverID == accountID).ToList();
 
             return result;
         }

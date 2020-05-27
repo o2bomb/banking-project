@@ -60,6 +60,7 @@
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: function (data, textStatus, jqXHR) {
+                // Display alert message to indicate successful user creation
                 var message = "User created successfully:\n";
                 message += "User ID: " + data.userID + "\n"
                 message += "First name: " + data.firstName + "\n";
@@ -86,6 +87,7 @@
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function (data, textStatus, jqXHR) {
+                    // Display alert message to indicate successful user update
                     var message = "User updated successfully:\n";
                     message += "User ID: " + data.userID + "\n"
                     message += "First name: " + data.firstName + "\n";
@@ -111,6 +113,7 @@
                 contentType: 'application/json',
                 processData: false,
                 success: function (data, textStatus, jqXHR) {
+                    // Inject user values into text fields
                     $('#searchFName').val(data.firstName);
                     $('#searchLName').val(data.lastName);
                 },

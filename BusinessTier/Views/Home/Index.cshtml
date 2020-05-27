@@ -1,24 +1,27 @@
 ﻿<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+    <h1>BankDB</h1>
+    <p class="lead">A world-class banking system that may or may not have some bugs.</p>
+    <p class="lead">Tips for the marker:</p>
+    <ul>
+        <li>When you create a user, write down their ID. Some of the features (such as listing all the accounts for a given user) requires a valid user ID. The same goes for account IDs when creating accounts</li>
+        <li>You can use a program like Postman or Fiddler to manually call the API endpoints. @Html.ActionLink("Click here", "Index", "Help", new { area = "" }, null) to view the complete list of endpoints. Note that all endpoints starting with /api/bank belong to the business tier, the rest belonging to the data tier. <b>This web app only uses endpoints from the business tier</b></li>
+    </ul>
+    <p>@Html.ActionLink("Create your first user", "Users", "Home", new { area = "" }, new { @class = "btn btn-primary btn-lg" })</p>
 </div>
 <div class="row">
     <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>ASP.NET Web API is a framework that makes it easy to build HTTP services that reach
-        a broad range of clients, including browsers and mobile devices. ASP.NET Web API
-        is an ideal platform for building RESTful applications on the .NET Framework.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301870">Learn more &raquo;</a></p>
+        <h2>Users</h2>
+        <p>BankDB allows you to create new users, update, and query for existing users.</p>
+        <p>@Html.ActionLink("Learn more", "Users", "Home", new { area = "" }, new { @class = "btn btn-default" })</p>
     </div>
     <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301871">Learn more &raquo;</a></p>
+        <h2>Accounts</h2>
+        <p>Each user can have multiple accounts. BankDB allows you create accounts for each user, deposit and withdraw from accounts, and list all of the accounts for a given user.</p>
+        <p>@Html.ActionLink("Learn more", "Accounts", "Home", new { area = "" }, new { @class = "btn btn-default" })</p>
     </div>
     <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301872">Learn more &raquo;</a></p>
+        <h2>Transaction</h2>
+        <p>Transactions can be created to transfer money between different accounts. BankDB allows you to create new transactions, and list all of the transactions for a given account.</p>
+        <p>@Html.ActionLink("Learn more", "Transactions", "Home", new { area = "" }, new { @class = "btn btn-default" })</p>
     </div>
 </div>

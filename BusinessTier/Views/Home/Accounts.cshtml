@@ -51,6 +51,26 @@
     </div>
     <button type="submit" class="btn btn-primary">Perform Withdrawal</button>
 </form>
+<h3>View a user's accounts:</h3>
+<form onsubmit="getAccounts(); return false;">
+    <div class="form-group">
+        <label for="getUserID">User ID</label>
+        <input type="text" id="getUserID" name="getUserID" placeholder="User ID" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Get Accounts</button>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">User ID</th>
+            <th scope="col">Balance</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <!-- Rows of account data are inserted programmatically -->
+    </tbody>
+</table>
 
 <script>
     function createAccount() {
@@ -63,6 +83,7 @@
                 contentType: 'application/json',
                 processData: false,
                 success: function (data, textStatus, jqXHR) {
+                    // Display alert message to indicate account creation
                     var message = "Account created successfully:\n";
                     message += "User ID: " + data.userID + "\n"
                     message += "Account ID: " + data.accountID + "\n";
@@ -88,12 +109,13 @@
                 contentType: 'application/json',
                 processData: false,
                 success: function (data, textStatus, jqXHR) {
+                    // Inject account details into text fields
                     var obj = data;
                     $('#searchUserID').val(obj.userID);
                     $('#searchBalance').val(obj.balance);
                 },
                 error: function (response) {
-                    window.alert("Failed to search for user: " + response.responseText);
+                    window.alert("Failed to search for account: " + response.responseText);
                 }
             });
         } else {
@@ -113,6 +135,7 @@
                 processData: false,
                 data: JSON.stringify(amount),
                 success: function (data, textStatus, jqXHR) {
+                    // Display alert message to indicate successful deposit
                     var message = "Deposited into account successfully:\n";
                     message += "User ID: " + data.userID + "\n"
                     message += "Account ID: " + data.accountID + "\n";
@@ -140,6 +163,7 @@
                 processData: false,
                 data: JSON.stringify(amount),
                 success: function (data, textStatus, jqXHR) {
+                    // Display alert message to indicate successful deposit
                     var message = "Deposited into account successfully:\n";
                     message += "User ID: " + data.userID + "\n"
                     message += "Account ID: " + data.accountID + "\n";
@@ -153,5 +177,49 @@
         } else {
             window.alert("Failed to perform withdrawal: Specified ID and amount must be a positive number");
         }
+    }
+
+    function getAccounts() {
+        // Delete old rows within the table
+        deleteAccountRows();
+        const id = parseInt($('#getUserID').val(), 10);
+        // Only send the request if the specified ID is a number
+        if (!isNaN(id) && id >= 0) {
+            $.ajax({
+                url: '/api/bank/user/' + id + '/accounts',
+                type: 'GET',
+                contentType: 'application/json',
+                processData: false,
+                success: function (data, textStatus, jqXHR) {
+                    data.forEach(function (account) {
+                        // For each account, insert a row in the table with the account details
+                        addAccountRow(account.accountID, account.userID, account.balance);
+                    });
+                },
+                error: function (response) {
+                    window.alert("Failed to fetch user's accounts: " + response.responseText);
+                }
+            });
+        } else {
+            window.alert("Failed to fetch user's accounts: Specified ID must be a positive number");
+        }
+    }
+
+    function addAccountRow(accountID, userID, balance) {
+        const tbody = document.getElementById("tableBody");
+        // Insert row at the end of table body
+        var newRow = tbody.insertRow();
+        // Insert account data into row
+        var accountIDCell = newRow.insertCell();
+        accountIDCell.appendChild(document.createTextNode(accountID));
+        var userIDCell = newRow.insertCell();
+        userIDCell.appendChild(document.createTextNode(userID));
+        var balanceCell = newRow.insertCell();
+        balanceCell.appendChild(document.createTextNode(balance));
+    }
+
+    function deleteAccountRows() {
+        // Delete all rows from the table
+        $("#tableBody tr").remove();
     }
 </script>

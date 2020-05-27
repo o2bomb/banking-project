@@ -63,6 +63,16 @@ namespace DataTier.Controllers
                 };
                 throw new HttpResponseException(response);
             }
+
+            if (newTransaction.receiverID == newTransaction.senderID)
+            {
+                var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent("Could not create new transaction"),
+                    ReasonPhrase = "Sender and Receiver ID cannot be the same"
+                };
+                throw new HttpResponseException(response);
+            }
             TransactionDetailStruct result = new TransactionDetailStruct();
 
             result.transactionID = access.CreateTransaction();

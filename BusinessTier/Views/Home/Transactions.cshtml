@@ -15,23 +15,48 @@
     </div>
     <button type="submit" class="btn btn-primary">Create Transaction</button>
 </form>
+<h3>View an account's transactions:</h3>
+<form onsubmit="getTransactions(); return false;">
+    <div class="form-group">
+        <label for="getAccountID">Account ID</label>
+        <input type="text" id="getAccountID" name="getAccountID" placeholder="Account ID" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Get Transactions</button>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Sender ID</th>
+            <th scope="col">Receiver ID</th>
+            <th scope="col">Amount</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        <!-- Rows of transaction data are inserted programmatically -->
+    </tbody>
+</table>
 
 <script>
     function createTransaction() {
+        const senderID = parseInt($('#createSenderID').val(), 10);
+        const receiverID = parseInt($('#createReceiverID').val(), 10);
+        const amount = parseInt($('#createAmount').val(), 10);
         const data = {
-            senderID: parseInt($('#createSenderID').val(), 10),
-            receiverID: parseInt($('#createReceiverID').val(), 10),
-            amount: parseInt($('#createAmount').val(), 10)
+            senderID: senderID,
+            receiverID: receiverID,
+            amount: amount
         };
         // Only send the request if the specified IDs are numbers, and the amount is more than 0
-        if (!isNaN(data.senderID) && data.senderID >= 0 && !isNan(data.receiverID) && data.receiverID >= 0 && !isNaN(data.amount) && data.amount > 0) {
+        if (!isNaN(data.senderID) && data.senderID >= 0 && !isNaN(data.receiverID) && data.receiverID >= 0 && !isNaN(data.amount) && data.amount > 0) {
             $.ajax({
                 url: '/api/bank/transaction/create',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function (data, textStatus, jqXHR) {
-                    var message = "Transaction created successfully:\n";
+                    // Display alert message to indicate successful transaction creation
+                    var message = "Transaction created successfully. It will be processed if the sender account has sufficient funds:\n";
                     message += "Transaction ID: " + data.transactionID + "\n"
                     message += "Sender ID: " + data.senderID + "\n";
                     message += "Receiver ID: " + data.receiverID + "\n";
@@ -45,5 +70,51 @@
         } else {
             window.alert("Failed to create transaction: Specified IDs and amount must be a positive number");
         }
+    }
+
+    function getTransactions() {
+        // Delete old rows within the table
+        deleteTransactionRows();
+        const id = parseInt($('#getAccountID').val(), 10);
+        // Only send the request if the specified ID is a number
+        if (!isNaN(id) && id >= 0) {
+            $.ajax({
+                url: '/api/bank/account/' + id + '/transactions',
+                type: 'GET',
+                contentType: 'application/json',
+                processData: false,
+                success: function (data, textStatus, jqXHR) {
+                    data.forEach(function (transaction) {
+                        // For each transaction, insert a row in the table with the transaction details
+                        addTransactionRow(transaction.transactionID, transaction.senderID, transaction.receiverID, transaction.amount);
+                    });
+                },
+                error: function (response) {
+                    window.alert("Failed to fetch account's transactions: " + response.responseText);
+                }
+            });
+        } else {
+            window.alert("Failed to fetch account's transactions: Specified ID must be a positive number");
+        }
+    }
+
+    function addTransactionRow(transactionID, senderID, receiverID, amount) {
+        const tbody = document.getElementById("tableBody");
+        // Insert row at the end of table body
+        var newRow = tbody.insertRow();
+        // Insert transaction data into row
+        var transactionIDCell = newRow.insertCell();
+        transactionIDCell.appendChild(document.createTextNode(transactionID));
+        var senderIDCell = newRow.insertCell();
+        senderIDCell.appendChild(document.createTextNode(senderID));
+        var receiverIDCell = newRow.insertCell();
+        receiverIDCell.appendChild(document.createTextNode(receiverID));
+        var amountCell = newRow.insertCell();
+        amountCell.appendChild(document.createTextNode(amount));
+    }
+
+    function deleteTransactionRows() {
+        // Delete all rows from the table
+        $("#tableBody tr").remove();
     }
 </script>
